@@ -31,7 +31,7 @@ router.put("/update/:id", updateAccount);
 router.put("/update-credit/:id", updateCredit);
 
 // Rout to delete a movie
-router.delete("/:id", deleteAccount);
+router.delete("/delete/:id", deleteAccount);
 
 // Rout to deposite money
 router.put("/deposit/:id", depositingMoney);
