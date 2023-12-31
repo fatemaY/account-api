@@ -1,7 +1,6 @@
 import STATUS_CODE from "../constants/statusCodes.js";
 import { readAccountsFromFile, writeAccountsToFile } from "../models/accountModel.js";
 
-let next_num= 12 ;
 
 // @des      Get all the movies
 // @route    GET /api/v1/movies
@@ -46,7 +45,13 @@ export const createaccount = async (req, res, next) => {
         "All fields (name, id) are required"
       );
     }
-    if (cash <0) {
+    if (!cash) {
+      cash = 0;
+    }
+    if (!credit) {
+      credit = 0;
+    }
+    if (typeof cash !== "number" || typeof credit !== "number") {
         res.status(STATUS_CODE.BAD_REQUEST);
         throw new Error(
           " The cash must be a positive number "
@@ -64,7 +69,8 @@ export const createaccount = async (req, res, next) => {
       res.status(STATUS_CODE.CONFLICT);
       throw new Error("Account with the same id already exists");
     }
-    const newAccount = { num:next_num++ , id , name, cash,credit:0 };
+    let next_num= accounts.length ;
+    const newAccount = { num:next_num , id , name, cash,credit:0 };
     accounts.push(newAccount);
     writeAccountsToFile(accounts);
     res.status(STATUS_CODE.CREATED).send(newAccount);
@@ -130,7 +136,7 @@ export const depositingMoney = async (req, res, next) => {
 
   try {
     const {money}  = req.body;
-    if (money < 0 ) {
+    if (!money || !parseInt(money) || parseInt(money)<0) {
       res.status(STATUS_CODE.BAD_REQUEST);
       throw new Error(
           "Only depositing with a positive numbers"
@@ -143,9 +149,8 @@ export const depositingMoney = async (req, res, next) => {
       throw new Error("Account with this id was not found!")
     }
    
-
     let account=accounts[index]
-    account.cash += money;
+    account.cash += parseInt(money);
     accounts[index]=account;
     writeAccountsToFile(accounts)
     res.send(account);
@@ -155,12 +160,48 @@ export const depositingMoney = async (req, res, next) => {
 };
 
 
+// @des   Withdraw money from user by id
+// @route PUT /api/v1/bank/withdraw/:userId
+export const withdraw = async (req, res, next) => {
+  try {
+      const id = req.params.idd;
+      const accounts = readAccountsFromFile();
+      const searchedAcc = accounts.find((acc) => acc.id === id);
+      if (!searchedAcc) {
+          res.status(STATUS_CODE.NOT_FOUND);
+          throw new Error("Account was not found");
+      }
+      let { money } = req.body;
 
-
-
-const checkPositive = (money) => {
-  if (money > 0) {
-    return true;
+      if (
+          !money ||
+          !parseInt(money) ||
+          parseInt(money) <0
+      ) {
+          res.status(STATUS_CODE.BAD_REQUEST);
+          throw new Error("Only withdraw with a positive numbers");
+      }
+      money = parseInt(money);
+      if (money <= searchedAcc.credit + searchedAcc.cash) {
+          if (money <= searchedAcc.cash) {
+            searchedAcc.cash -= money;
+          } else {
+            money -= searchedAcc.cash;
+            searchedAcc.cash = 0;
+            searchedAcc.credit -= money;
+          }
+      } else {
+          res.status(STATUS_CODE.CONFLICT);
+          throw new Error("You don't have enough credit or cash to withdraw");
+      }
+      writeUsersToFile(accounts);
+      res.send(searchedAcc);
+  } catch (error) {
+      next(error);
   }
-  throw Error("Only positive numbers");
 };
+
+
+
+
+

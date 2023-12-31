@@ -6,6 +6,7 @@ import{
     getAccountById,
     getAllAccounts,
     updateAccount,
+    withdraw,
 } from "../controllers/accountController.js";
 
 
@@ -28,6 +29,11 @@ router.delete("/:id", deleteAccount);
 
 // Rout to deposite money
 router.put("/:id", depositingMoney);
+
+// Rout to withdraw money
+router.put("/:id", withdraw);
+
+
 
 
 export default router
