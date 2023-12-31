@@ -1,5 +1,6 @@
 # account-api
 
+Link to the Project: https://new-accounts-api.onrender.com/api/v1/accounts
 
 1. Get All Accounts
 Endpoint: GET /api/v1/accounts
