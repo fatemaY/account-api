@@ -294,7 +294,7 @@ export const transfer = async (req, res, next) => {
           );
       }
       writeAccountsToFile(accounts);
-      res.send(accountToTransferFrom);
+      res.send({ accountToTransferFrom, accountToTransferTo });
   } catch (error) {
       next(error);
   }
